@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#F29A3C">
+<title>Adams Computer — Jual Beli Laptop & Jasa Service</title>
+<meta name="description" content="Adams Computer: jual beli laptop baru & bekas, jasa service laptop, dan pengajuan jual laptop.">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><i class="blob b4"></i></div>
+
+<header class="nav glass">
+  <a href="#beranda" class="brand"><img src="logo.svg" alt="Logo Adams Computer"><span class="brand-t">Adams Computer<small>Laptop &amp; Service</small></span></a>
+  <nav class="links" id="links">
+    <a href="#katalog">Katalog</a><a href="#servis">Servis</a><a href="#jual">Jual Laptop</a><a href="#lacak">Lacak</a><a href="#ulasan">Ulasan</a><a href="#kontak">Kontak</a>
+  </nav>
+  <button class="burger" id="burger" aria-label="Menu">☰</button>
+</header>
+
+<main class="container">
+  <!-- HERO -->
+  <div class="hero" id="beranda">
+    <div>
+      <span class="eyebrow glass"><i></i> Toko laptop &amp; service terpercaya</span>
+      <h1>Laptop impian, <span>service tanpa drama.</span></h1>
+      <p class="lead">Beli laptop baru &amp; bekas pilihan, service dengan estimasi jelas di awal, atau jual laptopmu ke kami. Semua status bisa dipantau online.</p>
+      <div class="cta">
+        <a href="#katalog" class="btn">Lihat Katalog →</a>
+        <a href="#servis" class="btn ghost"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-tools"/></svg> Booking Servis</a>
+      </div>
+      <div class="hstats">
+        <div class="hstat glass"><b id="stRating">–</b><span>Rating toko</span></div>
+        <div class="hstat glass"><b id="stProd">0</b><span>Laptop tersedia</span></div>
+        <div class="hstat glass"><b id="stSvc">0</b><span>Servis selesai</span></div>
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="ring glass"></div>
+      <img src="logo.svg" alt="Adams Computer">
+      <span class="chip-f c1 glass"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-laptop"/></svg> Baru &amp; Bekas</span>
+      <span class="chip-f c2 glass"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-tools"/></svg> Service Cepat</span>
+      <span class="chip-f c3 glass"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-box"/></svg> Lacak Online</span>
+    </div>
+  </div>
+
+  <!-- KEUNGGULAN -->
+  <div class="features">
+    <div class="feat glass reveal"><div class="ic"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-search"/></svg></div><h3>Kondisi Transparan</h3><p>Spesifikasi dan kondisi tiap laptop ditampilkan jelas, tanpa kejutan.</p></div>
+    <div class="feat glass reveal"><div class="ic"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-chat"/></svg></div><h3>Estimasi di Awal</h3><p>Biaya servis dikabari sebelum dikerjakan, kamu yang memutuskan.</p></div>
+    <div class="feat glass reveal"><div class="ic"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-pin"/></svg></div><h3>Status Real-time</h3><p>Pantau pesanan, servis, dan pengajuan jualmu lewat kode unik.</p></div>
+    <div class="feat glass reveal"><div class="ic"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-coins"/></svg></div><h3>Jual Laptop Mudah</h3><p>Isi form, kirim foto, tim kami kirim penawaran harga.</p></div>
+  </div>
+
+  <!-- KATALOG -->
+  <section id="katalog">
+    <div class="sec-h reveal"><div class="kicker">Katalog</div><h2>Pilih Laptopmu</h2><p>Laptop baru dan bekas berkualitas. Klik detail untuk spesifikasi lengkap.</p></div>
+    <div class="toolbar glass">
+      <div class="search"><input id="q" type="search" placeholder="Cari merk, tipe, prosesor…"></div>
+      <select id="fCond"><option>Semua</option><option>Baru</option><option>Bekas</option></select>
+      <select id="fSort"><option value="baru">Terbaru</option><option value="murah">Harga terendah</option><option value="mahal">Harga tertinggi</option></select>
+    </div>
+    <div class="pills" id="brands"></div>
+    <div class="pgrid" id="pgrid"></div>
+  </section>
+
+  <!-- SERVIS -->
+  <section id="servis">
+    <div class="sec-h reveal"><div class="kicker">Jasa Service</div><h2>Laptop Bermasalah? Serahkan ke Kami</h2><p>Pilih jenis layanan lalu isi form booking. Harga di bawah adalah perkiraan awal; biaya pasti diinformasikan setelah pengecekan.</p></div>
+    <div class="svc-grid" id="svcGrid"></div>
+    <div class="two">
+      <form class="glass pad" id="svcForm" novalidate>
+        <h3 style="margin-bottom:14px"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-note"/></svg> Form Booking Servis</h3>
+        <div class="grid2">
+          <div class="field"><label>Nama</label><input name="name" required placeholder="Nama lengkap"></div>
+          <div class="field"><label>No. WhatsApp</label><input name="wa" required inputmode="tel" placeholder="08xxxxxxxxxx"></div>
+        </div>
+        <div class="field"><label>Laptop (merk &amp; tipe)</label><input name="device" required placeholder="Contoh: Acer Aspire 3 A314"></div>
+        <div class="field"><label>Jenis layanan</label><select name="type" id="svcType"></select></div>
+        <div class="field"><label>Keluhan / masalah</label><textarea name="issue" required placeholder="Ceritakan gejalanya, misal: layar bergaris, sering restart, lemot…"></textarea></div>
+        <div class="grid2">
+          <div class="field"><label>Cara serah terima</label><select name="mode" id="svcMode"><option>Antar sendiri ke toko</option><option>Minta dijemput</option></select></div>
+          <div class="field" id="addrBox" hidden><label>Alamat penjemputan</label><input name="address" placeholder="Alamat lengkap"></div>
+        </div>
+        <button class="btn" style="width:100%">Kirim Booking Servis</button>
+      </form>
+      <div class="glass pad" id="lacak">
+        <h3 style="margin-bottom:6px"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-box"/></svg> Lacak Status</h3>
+        <p class="muted" style="font-size:14px;margin-bottom:14px">Masukkan kode pesanan, servis, atau pengajuan jual (contoh: <b>SRV-AB12CD</b>).</p>
+        <form id="trackForm" style="display:flex;gap:8px"><input id="trackCode" placeholder="Kode Anda" autocomplete="off" style="text-transform:uppercase"><button class="btn">Cek</button></form>
+        <div class="track-res" id="trackRes"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JUAL -->
+  <section id="jual">
+    <div class="sec-h reveal"><div class="kicker">Jual Laptop</div><h2>Mau Jual Laptopmu?</h2><p>Isi data dan kirim foto. Admin akan meninjau lalu menghubungimu lewat WhatsApp dengan penawaran harga.</p></div>
+    <form class="glass pad" id="sellForm" novalidate>
+      <div class="grid2">
+        <div class="field"><label>Nama</label><input name="name" required placeholder="Nama lengkap"></div>
+        <div class="field"><label>No. WhatsApp</label><input name="wa" required inputmode="tel" placeholder="08xxxxxxxxxx"></div>
+        <div class="field"><label>Merk</label><input name="brand" required placeholder="Contoh: Lenovo"></div>
+        <div class="field"><label>Tipe / model</label><input name="model" required placeholder="Contoh: ThinkPad T14 Gen 1"></div>
+        <div class="field"><label>Spesifikasi</label><input name="specs" required placeholder="CPU / RAM / Storage"></div>
+        <div class="field"><label>Kondisi</label><select name="cond"><option>Seperti baru</option><option>Mulus</option><option selected>Normal (bekas pakai)</option><option>Ada minus / lecet</option><option>Rusak (butuh perbaikan)</option></select></div>
+        <div class="field"><label>Harga yang diharapkan (Rp)</label><input name="ask" type="number" min="0" required placeholder="3500000"></div>
+        <div class="field"><label>Kelengkapan</label><input name="kit" placeholder="Charger, dus, nota, dll."></div>
+      </div>
+      <div class="field"><label>Deskripsi / minus yang ada</label><textarea name="desc" placeholder="Lama pemakaian, kondisi baterai, bagian yang pernah diservis, dll."></textarea></div>
+      <div class="field"><label>Foto laptop (maks. 3)</label><input type="file" id="sellPhotos" accept="image/*" multiple><div class="thumbs" id="sellThumbs"></div><div class="hint">Foto otomatis dikecilkan agar ringan.</div></div>
+      <button class="btn">Kirim Pengajuan Jual</button>
+    </form>
+  </section>
+
+  <!-- ULASAN -->
+  <section id="ulasan">
+    <div class="sec-h reveal"><div class="kicker">Rating &amp; Ulasan</div><h2>Kata Pelanggan</h2><p>Sudah pernah bertransaksi? Bagikan pengalamanmu. Isi kode pesanan agar ulasanmu bertanda terverifikasi.</p></div>
+    <div class="rev-top">
+      <div class="glass avg"><div class="n" id="avgN">–</div><div id="avgStars"></div><div class="muted" id="avgC" style="font-size:13px;margin-top:4px"></div><div class="bars" id="bars"></div></div>
+      <form class="glass pad" id="revForm" novalidate>
+        <h3 style="margin-bottom:10px">Beri Penilaian</h3>
+        <div class="star-pick" id="starPick">
+          <button type="button" data-v="1">★</button><button type="button" data-v="2">★</button><button type="button" data-v="3">★</button><button type="button" data-v="4">★</button><button type="button" data-v="5">★</button>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Nama</label><input name="name" required placeholder="Nama Anda"></div>
+          <div class="field"><label>Kode pesanan (opsional)</label><input name="code" placeholder="ORD-XXXXX / SRV-XXXXX" style="text-transform:uppercase"></div>
+        </div>
+        <div class="field"><label>Ulasan</label><textarea name="text" required placeholder="Ceritakan pengalamanmu…"></textarea></div>
+        <button class="btn">Kirim Ulasan</button>
+      </form>
+    </div>
+    <div class="rev-list" id="revList"></div>
+    <div style="text-align:center;margin-top:16px"><button class="btn ghost" id="moreRev" hidden>Tampilkan semua ulasan</button></div>
+  </section>
+</main>
+
+<footer class="container" id="kontak">
+  <div class="foot glass">
+    <div><div class="brand" style="margin-bottom:10px"><img src="logo.svg" alt=""><span class="brand-t">Adams Computer</span></div><p>Jual beli laptop baru &amp; bekas, jasa service, dan beli laptop bekas Anda.</p></div>
+    <div><h4>Kontak</h4><ul><li id="fAddr"></li><li id="fHours"></li><li id="fMail"></li></ul></div>
+    <div><h4>Hubungi Kami</h4><a id="fWa" class="btn wa" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-wa"/></svg> Chat WhatsApp</a></div>
+  </div>
+  <p class="copy">© <span id="yr"></span> Adams Computer · <a href="admin.html">Masuk Admin</a></p>
+</footer>
+<a class="wa-fab" id="waFab" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-wa"/></svg></a>
+
+<script src="app.js"></script>
+<script>
+const state = { q: '', brand: 'Semua', cond: 'Semua', sort: 'baru' };
+const prod = id => list('products').find(p => p.id === id);
+
+/* ---------- statistik & footer ---------- */
+function renderStats() {
+  const r = ratingInfo();
+  $('#stRating').textContent = r.n ? r.avg.toFixed(1) + ' ★' : 'Baru';
+  $('#stProd').textContent = list('products').filter(p => p.stock > 0).length;
+  $('#stSvc').textContent = PUB.svcDone;
+}
+function applyConfig() {
+  $('#fAddr').innerHTML = ico('pin') + ' ' + esc(CONFIG.address);
+  $('#fHours').innerHTML = ico('clock') + ' ' + esc(CONFIG.hours);
+  $('#fMail').innerHTML = ico('mail') + ' ' + esc(CONFIG.email);
+  $('#fWa').href = waLink('Halo Adams Computer, saya ingin bertanya.');
+  $('#waFab').href = waLink('Halo Adams Computer, saya ingin bertanya.');
+}
+applyConfig();
+$('#yr').textContent = new Date().getFullYear();
+$('#burger').onclick = () => $('#links').classList.toggle('open');
+$$('#links a').forEach(a => a.onclick = () => $('#links').classList.remove('open'));
+
+/* ---------- katalog ---------- */
+function renderBrands() {
+  const bs = ['Semua', ...new Set(list('products').map(p => p.brand))];
+  $('#brands').innerHTML = bs.map(b => `<button class="pill ${b === state.brand ? 'on' : ''}" data-brand="${esc(b)}">${esc(b)}</button>`).join('');
+}
+function renderCatalog() {
+  let ps = list('products').filter(p => {
+    const t = (p.name + ' ' + p.brand + ' ' + p.cpu + ' ' + p.ram + ' ' + p.storage + ' ' + p.gpu).toLowerCase();
+    return (!state.q || t.includes(state.q.toLowerCase())) && (state.brand === 'Semua' || p.brand === state.brand) && (state.cond === 'Semua' || p.cond === state.cond);
+  });
+  if (state.sort === 'murah') ps.sort((a, b) => a.price - b.price);
+  else if (state.sort === 'mahal') ps.sort((a, b) => b.price - a.price);
+  else ps.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  $('#pgrid').innerHTML = ps.length ? ps.map(p => `
+    <article class="pcard glass">
+      <div class="pimg">${laptopSVG(p.hue)}<span class="tag ${p.cond === 'Baru' ? 'new' : 'used'}">${esc(p.cond)}</span>${p.stock <= 0 ? '<span class="soldout">HABIS</span>' : ''}</div>
+      <h3>${esc(p.name)}</h3>
+      <div class="chips"><span>${esc(p.cpu)}</span><span>${esc(p.ram)}</span><span>${esc(p.storage)}</span></div>
+      <div class="pfoot"><b class="price">${rupiah(p.price)}</b><div><button class="btn ghost sm" data-detail="${p.id}">Detail</button><button class="btn sm" data-buy="${p.id}" ${p.stock <= 0 ? 'disabled' : ''}>Beli</button></div></div>
+    </article>`).join('') : '<div class="empty glass" style="grid-column:1/-1"><b>' + ico('search') + '</b>Laptop tidak ditemukan. Coba kata kunci lain.</div>';
+}
+function openDetail(id) {
+  const p = prod(id); if (!p) return;
+  openModal(`<div class="detail"><div class="dimg">${laptopSVG(p.hue)}</div><div>
+    <span class="badge s-${p.cond === 'Baru' ? 'selesai' : 'diterima'}">${esc(p.cond)}</span>
+    <h2 style="margin-top:8px">${esc(p.name)}</h2><div class="price big">${rupiah(p.price)}</div>
+    <table class="spec"><tr><td>Prosesor</td><td>${esc(p.cpu)}</td></tr><tr><td>RAM</td><td>${esc(p.ram)}</td></tr><tr><td>Penyimpanan</td><td>${esc(p.storage)}</td></tr><tr><td>Grafis</td><td>${esc(p.gpu)}</td></tr><tr><td>Layar</td><td>${esc(p.screen)}</td></tr><tr><td>Stok</td><td>${p.stock > 0 ? p.stock + ' unit' : 'Habis'}</td></tr></table>
+    <p class="muted" style="font-size:14px;margin-bottom:16px">${esc(p.desc)}</p>
+    <button class="btn" style="width:100%" data-buy="${p.id}" ${p.stock <= 0 ? 'disabled' : ''}>Beli Sekarang</button></div></div>`, 'wide');
+}
+function openBuy(id) {
+  const p = prod(id); if (!p || p.stock <= 0) return;
+  const m = openModal(`<h2>Pesan Laptop</h2><p class="muted" style="margin-bottom:16px;font-size:14px">${esc(p.name)}</p>
+    <form id="buyForm" novalidate>
+      <div class="grid2"><div class="field"><label>Nama</label><input name="name" required></div><div class="field"><label>No. WhatsApp</label><input name="wa" required inputmode="tel" placeholder="08xxxxxxxxxx"></div></div>
+      <div class="field"><label>Alamat pengiriman / catatan ambil di toko</label><textarea name="address" required style="min-height:70px"></textarea></div>
+      <div class="grid2"><div class="field"><label>Pembayaran</label><select name="pay"><option>QRIS</option><option>Transfer Bank</option><option>Bayar di Toko (COD)</option></select></div><div class="field"><label>Jumlah</label><input name="qty" type="number" min="1" max="${p.stock}" value="1"></div></div>
+      <div class="field"><label>Catatan (opsional)</label><input name="note"></div>
+      <div class="sumbox"><span>Total</span><b class="price" id="buyTotal">${rupiah(p.price)}</b></div>
+      <div id="qrisBox"></div>
+      <button class="btn" style="width:100%">Buat Pesanan</button></form>`);
+  const f = $('#buyForm', m);
+  const upd = () => { const q = Math.max(1, Math.min(p.stock, +f.qty.value || 1)), tot = q * p.price; $('#buyTotal', m).textContent = rupiah(tot); $('#qrisBox', m).innerHTML = f.pay.value === 'QRIS' ? qrisBox(tot) : ''; };
+  f.qty.oninput = upd; f.pay.onchange = upd; upd();
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const name = f.name.value.trim(), wa = normWA(f.wa.value), addr = f.address.value.trim();
+    const qty = Math.max(1, Math.min(p.stock, +f.qty.value || 1));
+    if (!name || wa.length < 9 || !addr) return toast('Lengkapi nama, WhatsApp yang valid, dan alamat.', 'err');
+    const btn = $('button.btn', f); btn.disabled = true;
+    try {
+      const o = await api('/api/orders', 'POST', { productId: p.id, qty, name, wa, address: addr, payment: f.pay.value, note: f.note.value.trim() });
+      await loadPublic().catch(() => { }); refreshAll();
+      done('Pesanan Berhasil Dibuat!', o.id, `Halo Adams Computer, saya sudah memesan ${p.name} (${qty} unit) dengan kode ${o.id}. Pembayaran: ${o.payment}. Mohon konfirmasi. Terima kasih.`, o.payment === 'QRIS' ? qrisBox(o.total) : '');
+    } catch (err) {
+      toast(err.message, 'err'); btn.disabled = false;
+      if (err.status === 409) { await loadPublic().catch(() => { }); refreshAll(); }
+    }
+  };
+}
+function done(title, code, waText, extra = '') {
+  openModal(`<div class="ok-ico">${ico('check')}</div><h2 style="text-align:center;padding:0">${title}</h2><p class="muted" style="text-align:center;font-size:14px">Simpan kode di bawah untuk melacak status.</p><span class="code">${code}</span>${extra}<a class="btn wa" style="width:100%" target="_blank" rel="noopener" href="${waLink(waText)}">${ico('wa')} Konfirmasi via WhatsApp</a><button class="btn ghost" style="width:100%;margin-top:10px" data-close>Tutup</button>`);
+}
+
+/* ---------- servis ---------- */
+$('#svcGrid').innerHTML = SERVICE_TYPES.map(s => `<div class="svc glass" data-svc="${esc(s.n)}"><span class="e">${ico(s.e)}</span><div><b>${s.n}</b><small>${s.p}</small></div></div>`).join('');
+$('#svcType').innerHTML = SERVICE_TYPES.map(s => `<option>${s.n}</option>`).join('');
+$('#svcMode').onchange = e => $('#addrBox').hidden = e.target.value !== 'Minta dijemput';
+$('#svcForm').onsubmit = async e => {
+  e.preventDefault(); const f = e.target;
+  const name = f.name.value.trim(), wa = normWA(f.wa.value);
+  if (!name || wa.length < 9 || !f.device.value.trim() || !f.issue.value.trim()) return toast('Lengkapi nama, WhatsApp valid, laptop, dan keluhan.', 'err');
+  if (f.mode.value === 'Minta dijemput' && !f.address.value.trim()) return toast('Isi alamat penjemputan.', 'err');
+  const btn = $('button.btn', f); btn.disabled = true;
+  try {
+    const s = await api('/api/services', 'POST', { name, wa, device: f.device.value.trim(), type: f.type.value, issue: f.issue.value.trim(), mode: f.mode.value, address: f.address.value.trim() });
+    f.reset(); $('#addrBox').hidden = true; refreshAll();
+    done('Booking Servis Diterima!', s.id, `Halo Adams Computer, saya booking servis ${s.device} (${s.type}) dengan kode ${s.id}.`);
+  } catch (err) { toast(err.message, 'err'); }
+  btn.disabled = false;
+};
+
+/* ---------- jual laptop ---------- */
+let sellPhotos = [];
+$('#sellPhotos').onchange = async e => {
+  const fs = [...e.target.files].slice(0, 3); sellPhotos = [];
+  try { for (const f of fs) sellPhotos.push(await compressImage(f)); } catch (x) { toast('Foto tidak dapat dibaca.', 'err'); }
+  $('#sellThumbs').innerHTML = sellPhotos.map(s => `<img src="${s}" alt="foto">`).join('');
+};
+$('#sellForm').onsubmit = async e => {
+  e.preventDefault(); const f = e.target;
+  const wa = normWA(f.wa.value);
+  if (!f.name.value.trim() || wa.length < 9 || !f.brand.value.trim() || !f.model.value.trim() || !f.specs.value.trim() || !f.ask.value) return toast('Lengkapi semua kolom wajib.', 'err');
+  const btn = $('button.btn', f); btn.disabled = true;
+  try {
+    const s = await api('/api/sells', 'POST', { name: f.name.value.trim(), wa, brand: f.brand.value.trim(), model: f.model.value.trim(), specs: f.specs.value.trim(), cond: f.cond.value, ask: +f.ask.value, kit: f.kit.value.trim(), desc: f.desc.value.trim(), photos: sellPhotos });
+    f.reset(); sellPhotos = []; $('#sellThumbs').innerHTML = '';
+    done('Pengajuan Terkirim!', s.id, `Halo Adams Computer, saya mengajukan jual ${s.brand} ${s.model} dengan kode ${s.id}.`);
+  } catch (err) { toast(err.message, 'err'); }
+  btn.disabled = false;
+};
+
+/* ---------- lacak ---------- */
+const FLOWS = { ORD: ['Menunggu', 'Diproses', 'Dikirim', 'Selesai'], SRV: ['Diterima', 'Diagnosa', 'Dikerjakan', 'Siap Diambil', 'Selesai'], JUAL: ['Menunggu', 'Ditawar', 'Disetujui'] };
+async function track(code) {
+  const box = $('#trackRes'); box.innerHTML = '<div class="note">Mencari…</div>';
+  let r;
+  try { r = await api('/api/track?code=' + encodeURIComponent(code.trim())); }
+  catch (err) { box.innerHTML = `<div class="note">${esc(err.status === 404 ? 'Kode tidak ditemukan. Periksa kembali penulisannya.' : err.message)}</div>`; return; }
+  const pre = r.kind, rec = r.rec, flow = FLOWS[pre]; const idx = flow.indexOf(rec.status); const bad = idx < 0;
+  const titles = { ORD: 'Pesanan ' + (rec.productName || ''), SRV: 'Servis ' + (rec.device || ''), JUAL: 'Jual ' + (rec.brand || '') + ' ' + (rec.model || '') };
+  let kv = `<div class="kv"><span>Dibuat</span><b>${fmtDate(rec.createdAt)}</b></div>`;
+  if (pre === 'ORD') kv += `<div class="kv"><span>Total</span><b>${rupiah(rec.total)}</b></div><div class="kv"><span>Pembayaran</span><b>${esc(rec.payment)} · ${rec.paid ? 'Sudah dibayar' : 'Belum dibayar'}</b></div>`;
+  if (pre === 'SRV' && rec.cost) kv += `<div class="kv"><span>Biaya servis</span><b>${rupiah(rec.cost)}</b></div>`;
+  if (pre === 'JUAL' && rec.offer) kv += `<div class="kv"><span>Penawaran toko</span><b>${rupiah(rec.offer)}</b></div>`;
+  box.innerHTML = `<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><b>${esc(titles[pre])}</b>${badge(rec.status)}</div>
+    ${bad ? '' : `<div class="steps">${flow.map((s, i) => `<div class="step ${i <= idx ? 'done' : ''}"><i>${i <= idx ? '✓' : i + 1}</i>${s}</div>`).join('')}</div>`}
+    <div class="kvs">${kv}</div>${rec.adminNote ? `<div class="note">${ico('chat')} Catatan toko: ${esc(rec.adminNote)}</div>` : ''}`;
+}
+$('#trackForm').onsubmit = e => { e.preventDefault(); if ($('#trackCode').value.trim()) track($('#trackCode').value); };
+
+/* ---------- ulasan ---------- */
+let pick = 0, showAll = false;
+function renderStars() { $$('#starPick button').forEach(b => b.classList.toggle('on', +b.dataset.v <= pick)); }
+$('#starPick').onclick = e => { const b = e.target.closest('button'); if (b) { pick = +b.dataset.v; renderStars(); } };
+function renderReviews() {
+  const { n, avg, dist } = ratingInfo();
+  $('#avgN').textContent = n ? avg.toFixed(1) : '–';
+  $('#avgStars').innerHTML = n ? stars(avg) : '';
+  $('#avgC').textContent = n ? `dari ${n} ulasan` : 'Belum ada ulasan';
+  $('#bars').innerHTML = [5, 4, 3, 2, 1].map((s, i) => `<div class="bar"><span>${s}★</span><div><i style="width:${n ? dist[i] / n * 100 : 0}%"></i></div><span>${dist[i]}</span></div>`).join('');
+  const rs = list('reviews').sort((a, b) => b.createdAt - a.createdAt);
+  const shown = showAll ? rs : rs.slice(0, 6);
+  $('#revList').innerHTML = shown.length ? shown.map(r => `<div class="rev glass"><div class="who"><div class="av">${esc(r.name.trim()[0] || '?').toUpperCase()}</div><div><b>${esc(r.name)}</b>${r.verified ? '<span class="ver">✓ Terverifikasi</span>' : ''}<br><small>${fmtDate(r.createdAt)}</small></div></div>${stars(r.rating)}<p style="margin-top:6px">${esc(r.text)}</p></div>`).join('') : '<div class="empty glass" style="grid-column:1/-1"><b>' + ico('star') + '</b>Belum ada ulasan. Jadilah yang pertama!</div>';
+  $('#moreRev').hidden = showAll || rs.length <= 6;
+}
+$('#moreRev').onclick = () => { showAll = true; renderReviews(); };
+$('#revForm').onsubmit = async e => {
+  e.preventDefault(); const f = e.target;
+  if (!pick) return toast('Pilih jumlah bintang dulu ya.', 'err');
+  if (!f.name.value.trim() || f.text.value.trim().length < 5) return toast('Isi nama dan ulasan (minimal 5 karakter).', 'err');
+  const btn = $('button.btn', f); btn.disabled = true;
+  try {
+    await api('/api/reviews', 'POST', { name: f.name.value.trim(), rating: pick, text: f.text.value.trim(), code: f.code.value.trim() });
+    await loadPublic().catch(() => { });
+    f.reset(); pick = 0; renderStars(); refreshAll(); toast('Terima kasih atas ulasanmu!');
+  } catch (err) { toast(err.message, 'err'); }
+  btn.disabled = false;
+};
+
+/* ---------- event global ---------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-detail],[data-buy],[data-brand],[data-svc]'); if (!t) return;
+  if (t.dataset.detail) openDetail(t.dataset.detail);
+  else if (t.dataset.buy) openBuy(t.dataset.buy);
+  else if (t.dataset.brand) { state.brand = t.dataset.brand; renderBrands(); renderCatalog(); }
+  else if (t.dataset.svc) { $('#svcType').value = t.dataset.svc; $('#svcForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+});
+$('#q').oninput = e => { state.q = e.target.value; renderCatalog(); };
+$('#fCond').onchange = e => { state.cond = e.target.value; renderCatalog(); };
+$('#fSort').onchange = e => { state.sort = e.target.value; renderCatalog(); };
+
+function refreshAll() { applyConfig(); renderStats(); renderBrands(); renderCatalog(); renderReviews(); }
+$('#pgrid').innerHTML = '<div class="empty glass" style="grid-column:1/-1">Memuat katalog…</div>';
+loadPublic().then(refreshAll).catch(err => { $('#pgrid').innerHTML = `<div class="empty glass" style="grid-column:1/-1">${ico('alert')}${esc(err.message)}</div>`; });
+setInterval(() => { if (!document.hidden) loadPublic().then(refreshAll).catch(() => { }); }, 30000);
+const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } }), { threshold: .12 });
+$$('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

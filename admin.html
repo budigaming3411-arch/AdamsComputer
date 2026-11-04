@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin — Adams Computer</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><i class="blob b4"></i></div>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login" hidden>
+  <form class="login glass" id="loginForm">
+    <img src="logo.svg" alt="Adams Computer">
+    <h1>Admin Adams Computer</h1>
+    <p>Masuk untuk mengelola pesanan, servis, dan pengajuan jual.</p>
+    <div class="field" style="text-align:left"><label>Password admin</label><div style="position:relative"><input type="password" id="pw" placeholder="Masukkan password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" autofocus style="padding-right:76px"><button type="button" id="showPw" class="btn ghost sm" style="position:absolute;right:6px;top:50%;transform:translateY(-50%)">Lihat</button></div></div>
+    <button class="btn" style="width:100%">Masuk</button>
+    <div class="err-t" id="loginErr"></div>
+    <a href="index.html" class="muted" style="font-size:13px">← Kembali ke beranda</a>
+  </form>
+</div>
+
+<!-- APP -->
+<div class="app" id="app" hidden>
+  <aside class="side glass">
+    <div class="brand"><img src="logo.svg" alt=""><span class="brand-t">Adams Computer<small>Admin Panel</small></span></div>
+    <div id="tabs" style="display:contents"></div>
+    <div class="sp"></div>
+    <a href="index.html" class="tab btn ghost sm logout-t" style="justify-content:flex-start"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-globe"/></svg> Kembali ke beranda</a>
+    <button class="tab btn ghost sm" id="logout" style="justify-content:flex-start"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><use href="#i-logout"/></svg> Keluar</button>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<script src="app.js"></script>
+<script>
+let authed = false, timer = null, sig = '', seen = { o: 0, s: 0, j: 0 }, dirty = false;
+const state = { tab: 'dash', filter: 'Semua', q: '' };
+const TABS = [['dash', 'Ringkasan', 'chart'], ['orders', 'Pesanan', 'cart'], ['services', 'Servis', 'tools'], ['sells', 'Pengajuan Jual', 'brief'], ['products', 'Produk', 'laptop'], ['reviews', 'Ulasan', 'star'], ['settings', 'Pengaturan', 'gear']];
+const STAT = { orders: ORDER_STATUS, services: SERVICE_STATUS, sells: SELL_STATUS };
+const NEWST = { orders: 'Menunggu', services: 'Diterima', sells: 'Menunggu' };
+
+/* ---------- login / sesi ---------- */
+const counts = () => ({ o: list('orders').length, s: list('services').length, j: list('sells').length });
+const pending = () => list('orders').filter(o => o.status === 'Menunggu').length + list('services').filter(s => s.status === 'Diterima').length + list('sells').filter(s => s.status === 'Menunggu').length;
+function beep() { try { const a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value = 880; g.gain.setValueAtTime(.08, a.currentTime); g.gain.exponentialRampToValueAtTime(.0001, a.currentTime + .4); o.start(); o.stop(a.currentTime + .4); } catch (e) { } }
+function setTitle() { const n = pending(); document.title = (authed && n ? `(${n}) ` : '') + 'Admin — Adams Computer'; }
+async function enter() { await loadAdmin(); authed = true; sig = JSON.stringify(CACHE); seen = counts(); render(); startPoll(); }
+function startPoll() { stopPoll(); timer = setInterval(poll, 8000); }
+function stopPoll() { if (timer) clearInterval(timer); timer = null; }
+function expired() { authed = false; stopPoll(); render(); toast('Sesi berakhir, silakan masuk lagi.', 'err'); }
+async function poll() {
+  if (document.hidden || !authed) return;
+  try { await loadAdmin(); } catch (err) { if (err.status === 401) expired(); return; }
+  const n = counts(), parts = [];
+  if (n.o > seen.o) parts.push((n.o - seen.o) + ' pesanan');
+  if (n.s > seen.s) parts.push((n.s - seen.s) + ' servis');
+  if (n.j > seen.j) parts.push((n.j - seen.j) + ' pengajuan jual');
+  seen = n;
+  if (parts.length) { toast('Baru masuk: ' + parts.join(', ')); beep(); }
+  const s2 = JSON.stringify(CACHE);
+  if (s2 !== sig) { sig = s2; if (dirty || $('.modal-back')) { renderTabs(); setTitle(); } else render(); }
+}
+async function act(fn, okMsg) {
+  try { await fn(); await loadAdmin(); sig = JSON.stringify(CACHE); seen = counts(); render(); if (okMsg) toast(okMsg); }
+  catch (err) { if (err.status === 401) expired(); else toast(err.message, 'err'); }
+}
+$('#loginForm').onsubmit = async e => {
+  e.preventDefault(); const btn = $('button.btn', e.target); btn.disabled = true;
+  try { await api('/api/admin/login', 'POST', { password: $('#pw').value.trim() }); $('#pw').value = ''; $('#loginErr').textContent = ''; await enter(); }
+  catch (err) { $('#loginErr').textContent = err.message; $('#pw').select(); }
+  btn.disabled = false;
+};
+$('#showPw').onclick = () => { const p = $('#pw'); const s = p.type === 'password'; p.type = s ? 'text' : 'password'; $('#showPw').textContent = s ? 'Sembunyi' : 'Lihat'; };
+$('#logout').onclick = async () => { try { await api('/api/admin/logout', 'POST', {}); } catch (e) { } authed = false; stopPoll(); render(); };
+document.addEventListener('input', e => { if (e.target.closest('.rec-f, #setForm')) dirty = true; });
+document.addEventListener('change', e => { if (e.target.closest('.rec-f, #setForm')) dirty = true; });
+
+/* ---------- util tampilan ---------- */
+const kv = (k, v) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`;
+const waBtn = (num, text) => `<a class="btn wa sm" target="_blank" rel="noopener" href="${waLink(text, num)}">${ico('wa')} WhatsApp</a>`;
+const sel = (opts, cur) => `<select data-f="status">${opts.map(o => `<option${o === cur ? ' selected' : ''}>${o}</option>`).join('')}</select>`;
+const match = r => !state.q || JSON.stringify(r).toLowerCase().includes(state.q.toLowerCase());
+const filt = (col) => list(col).filter(r => (state.filter === 'Semua' || r.status === state.filter) && match(r)).sort((a, b) => b.createdAt - a.createdAt);
+function csv(rows, name) {
+  const keys = [...new Set(rows.flatMap(r => Object.keys(r)))].filter(k => k !== 'photos');
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const t = [keys.join(','), ...rows.map(r => keys.map(k => q(k === 'createdAt' ? new Date(r[k]).toISOString() : r[k])).join(','))].join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + t], { type: 'text/csv' })); a.download = name + '.csv'; a.click();
+}
+function filterBar(col, title) {
+  const all = list(col);
+  const chips = ['Semua', ...STAT[col]].map(s => `<button class="pill ${state.filter === s ? 'on' : ''}" data-filter="${s}">${s} (${s === 'Semua' ? all.length : all.filter(r => r.status === s).length})</button>`).join('');
+  return `<div class="top"><h1>${title}</h1><button class="btn ghost sm" data-act="csv" data-col="${col}">${ico('download')} Ekspor CSV</button></div>
+    <div class="fbar"><div class="s"><input type="search" id="gq" placeholder="Cari nama, kode, produk…" value="${esc(state.q)}"></div></div><div class="pills">${chips}</div>`;
+}
+const empty = t => `<div class="empty glass"><b>${ico('inbox')}</b>${t}</div>`;
+
+/* ---------- render ---------- */
+function renderTabs() {
+  const c = { orders: list('orders').filter(o => o.status === 'Menunggu').length, services: list('services').filter(s => s.status === 'Diterima').length, sells: list('sells').filter(s => s.status === 'Menunggu').length };
+  $('#tabs').innerHTML = TABS.map(([k, n, i]) => `<button class="tab ${state.tab === k ? 'on' : ''}" data-tab="${k}">${ico(i)}${n}${c[k] ? `<span class="bdg">${c[k]}</span>` : ''}</button>`).join('');
+}
+function render() {
+  if (!authed) { $('#login').hidden = false; $('#app').hidden = true; setTitle(); return; }
+  $('#login').hidden = true; $('#app').hidden = false; dirty = false;
+  renderTabs(); setTitle();
+  const f = { dash, orders: rOrders, services: rServices, sells: rSells, products: rProducts, reviews: rReviews, settings: rSettings }[state.tab];
+  const keep = document.activeElement && document.activeElement.id === 'gq';
+  $('#main').innerHTML = f();
+  if (keep) { const g = $('#gq'); g.focus(); g.setSelectionRange(g.value.length, g.value.length); }
+}
+
+function dash() {
+  const O = list('orders'), S = list('services'), J = list('sells'), P = list('products'), r = ratingInfo();
+  const revenue = O.filter(o => o.status === 'Selesai').reduce((a, o) => a + o.total, 0) + S.filter(s => s.status === 'Selesai').reduce((a, s) => a + (+s.cost || 0), 0);
+  const days = [...Array(7)].map((_, i) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (6 - i)); return d; });
+  const cnt = days.map(d => { const a = +d, b = a + 864e5; return [...O, ...S, ...J].filter(x => x.createdAt >= a && x.createdAt < b).length; });
+  const mx = Math.max(1, ...cnt);
+  const acts = [...O.map(x => ({ e: 'cart', t: `Pesanan ${x.id} — ${x.productName}`, n: x.name, s: x.status, at: x.createdAt })), ...S.map(x => ({ e: 'tools', t: `Servis ${x.id} — ${x.device}`, n: x.name, s: x.status, at: x.createdAt })), ...J.map(x => ({ e: 'brief', t: `Jual ${x.id} — ${x.brand} ${x.model}`, n: x.name, s: x.status, at: x.createdAt }))].sort((a, b) => b.at - a.at).slice(0, 8);
+  const low = P.filter(p => p.stock <= 1);
+  return `<div class="top"><h1>Ringkasan</h1><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost sm" href="/api/admin/backup" download>${ico('download')} Unduh cadangan</a><button class="btn ghost sm" data-act="restore">${ico('inbox')} Pulihkan</button><button class="btn danger sm" data-act="reset">${ico('trash')} Reset data transaksi</button></div><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
+  ${CACHE.settings && !CACHE.settings.configured ? `<div class="note" style="margin-bottom:14px;border:1px solid var(--o2);display:flex;gap:10px;align-items:center;flex-wrap:wrap">${ico('alert')} <span>Pengaturan toko belum diisi: nomor WhatsApp, alamat, dan QRIS asli.</span><button class="btn sm" data-tab="settings">Isi sekarang</button></div>` : ''}
+  <div class="stats">
+    <div class="stat glass"><span>Pesanan baru</span><b>${O.filter(o => o.status === 'Menunggu').length}</b><small>${O.length} total pesanan</small></div>
+    <div class="stat glass"><span>Servis berjalan</span><b>${S.filter(s => !['Selesai', 'Dibatalkan'].includes(s.status)).length}</b><small>${S.length} total servis</small></div>
+    <div class="stat glass"><span>Pengajuan jual</span><b>${J.filter(s => s.status === 'Menunggu').length}</b><small>menunggu ditinjau</small></div>
+    <div class="stat glass"><span>Pendapatan selesai</span><b>${rupiah(revenue)}</b><small>pesanan + servis selesai</small></div>
+    <div class="stat glass"><span>Rating toko</span><b>${r.n ? r.avg.toFixed(1) + ' ★' : '–'}</b><small>${r.n} ulasan</small></div>
+  </div>
+  <div class="dash2">
+    <div class="glass pad"><h3>Aktivitas 7 hari terakhir</h3><div class="chart">${cnt.map((v, i) => `<div><span>${v}</span><i style="height:${v / mx * 100}%"></i><span>${days[i].toLocaleDateString('id-ID', { weekday: 'short' })}</span></div>`).join('')}</div>
+      <h3 style="margin-top:22px">Stok menipis</h3>${low.length ? low.map(p => `<div class="act"><span class="e">${ico('alert')}</span><div>${esc(p.name)}<small class="${p.stock <= 0 ? 'low' : ''}">${p.stock <= 0 ? 'Habis' : 'Sisa ' + p.stock + ' unit'}</small></div></div>`).join('') : '<p class="muted" style="font-size:14px;margin-top:8px">Semua stok aman ' + ico('check') + '</p>'}</div>
+    <div class="glass pad"><h3>Aktivitas terbaru</h3>${acts.length ? acts.map(a => `<div class="act"><span class="e">${ico(a.e)}</span><div>${esc(a.t)}<small>${esc(a.n)} · ${fmtDate(a.at)}</small></div><span style="margin-left:auto">${badge(a.s)}</span></div>`).join('') : '<p class="muted" style="font-size:14px;margin-top:8px">Belum ada aktivitas.</p>'}</div>
+  </div>`;
+}
+
+function rOrders() {
+  const rs = filt('orders');
+  return filterBar('orders', 'Pesanan Pembelian') + `<div class="list">${rs.length ? rs.map(o => `
+  <article class="rec glass" data-col="orders" data-id="${o.id}">
+    <div class="rec-h"><div><b>${o.id}</b><small>${fmtDate(o.createdAt)}</small></div>${badge(o.status)}</div>
+    <div class="kvs">${kv('Produk', esc(o.productName))}${kv('Jumlah', o.qty + ' unit')}${kv('Total', rupiah(o.total))}${kv('Pembeli', esc(o.name))}${kv('WhatsApp', esc(o.wa))}${kv('Pembayaran', esc(o.payment) + ' · ' + (o.paid ? 'Sudah dibayar' : 'Belum dibayar'))}</div>
+    <div class="note">${ico('pin')} ${esc(o.address)}${o.note ? '<br>' + ico('note') + ' ' + esc(o.note) : ''}</div>
+    <div class="rec-f"><div class="fld"><label>Ubah status</label>${sel(ORDER_STATUS, o.status)}</div><div class="fld"><label>Pembayaran</label><select data-f="paid"><option${!o.paid ? ' selected' : ''}>Belum dibayar</option><option${o.paid ? ' selected' : ''}>Sudah dibayar</option></select></div><button class="btn sm" data-act="save-order">Simpan</button>${waBtn(o.wa, `Halo ${o.name}, pesanan ${o.id} (${o.productName}) di Adams Computer saat ini berstatus: ${o.status}.`)}<button class="btn danger sm" data-act="del" data-col="orders">Hapus</button></div>
+  </article>`).join('') : empty('Belum ada pesanan pada filter ini.')}</div>`;
+}
+function rServices() {
+  const rs = filt('services');
+  return filterBar('services', 'Servis Laptop') + `<div class="list">${rs.length ? rs.map(s => `
+  <article class="rec glass" data-col="services" data-id="${s.id}">
+    <div class="rec-h"><div><b>${s.id}</b><small>${fmtDate(s.createdAt)}</small></div>${badge(s.status)}</div>
+    <div class="kvs">${kv('Laptop', esc(s.device))}${kv('Layanan', esc(s.type))}${kv('Pelanggan', esc(s.name))}${kv('WhatsApp', esc(s.wa))}${kv('Serah terima', esc(s.mode))}</div>
+    <div class="note">${ico('tools')} ${esc(s.issue)}${s.address ? '<br>' + ico('pin') + ' ' + esc(s.address) : ''}</div>
+    <div class="rec-f"><div class="fld"><label>Status</label>${sel(SERVICE_STATUS, s.status)}</div><div class="fld"><label>Biaya servis (Rp)</label><input data-f="cost" type="number" min="0" value="${s.cost || ''}" placeholder="0"></div><div class="fld" style="flex:2 1 220px"><label>Catatan untuk pelanggan</label><input data-f="adminNote" value="${esc(s.adminNote)}" placeholder="Hasil diagnosa, estimasi selesai…"></div><button class="btn sm" data-act="save-service">Simpan</button>${waBtn(s.wa, `Halo ${s.name}, servis ${s.id} (${s.device}) di Adams Computer berstatus: ${s.status}.${s.cost ? ' Biaya: ' + rupiah(s.cost) + '.' : ''}`)}<button class="btn danger sm" data-act="del" data-col="services">Hapus</button></div>
+  </article>`).join('') : empty('Belum ada servis pada filter ini.')}</div>`;
+}
+function rSells() {
+  const rs = filt('sells');
+  return filterBar('sells', 'Pengajuan Penjualan Laptop') + `<div class="list">${rs.length ? rs.map(s => `
+  <article class="rec glass" data-col="sells" data-id="${s.id}">
+    <div class="rec-h"><div><b>${s.id}</b><small>${fmtDate(s.createdAt)}</small></div>${badge(s.status)}</div>
+    <div class="kvs">${kv('Laptop', esc(s.brand + ' ' + s.model))}${kv('Spesifikasi', esc(s.specs))}${kv('Kondisi', esc(s.cond))}${kv('Harga diminta', rupiah(s.ask))}${kv('Penjual', esc(s.name))}${kv('WhatsApp', esc(s.wa))}${s.kit ? kv('Kelengkapan', esc(s.kit)) : ''}</div>
+    ${s.desc ? `<div class="note">${ico('note')} ${esc(s.desc)}</div>` : ''}
+    ${s.photoCount ? `<div class="thumbs">${[...Array(s.photoCount)].map((_, i) => `<img src="/api/admin/sells/${s.id}/photo/${i}" alt="foto ${i + 1}" data-photo="${s.id}:${i}">`).join('')}</div>` : ''}
+    <div class="rec-f"><div class="fld"><label>Status</label>${sel(SELL_STATUS, s.status)}</div><div class="fld"><label>Penawaran toko (Rp)</label><input data-f="offer" type="number" min="0" value="${s.offer || ''}" placeholder="0"></div><div class="fld" style="flex:2 1 220px"><label>Catatan untuk penjual</label><input data-f="adminNote" value="${esc(s.adminNote)}" placeholder="Alasan / jadwal pengecekan…"></div><button class="btn sm" data-act="save-sell">Simpan</button>${waBtn(s.wa, `Halo ${s.name}, terkait pengajuan jual ${s.brand} ${s.model} (${s.id}) di Adams Computer: status ${s.status}.${s.offer ? ' Penawaran kami ' + rupiah(s.offer) + '.' : ''}`)}<button class="btn danger sm" data-act="del" data-col="sells">Hapus</button></div>
+  </article>`).join('') : empty('Belum ada pengajuan pada filter ini.')}</div>`;
+}
+function rProducts() {
+  const ps = list('products').filter(match);
+  return `<div class="top"><h1>Produk Laptop</h1><button class="btn sm" data-act="add-product">${ico('plus')} Tambah Laptop</button></div>
+  <div class="fbar"><div class="s"><input type="search" id="gq" placeholder="Cari produk…" value="${esc(state.q)}"></div></div>
+  <div class="ptable">${ps.length ? ps.map(p => `<div class="prow glass">${laptopSVG(p.hue)}<div><b>${esc(p.name)}</b> <span class="badge s-${p.cond === 'Baru' ? 'selesai' : 'diterima'}">${esc(p.cond)}</span><div class="muted" style="font-size:13px">${esc(p.cpu)} · ${esc(p.ram)} · ${esc(p.storage)}</div><div><b class="price" style="font-size:16px">${rupiah(p.price)}</b> · <span class="${p.stock <= 1 ? 'low' : ''}">Stok ${p.stock}</span></div></div><div class="acts"><button class="btn ghost sm" data-act="edit-product" data-id="${p.id}">Edit</button><button class="btn danger sm" data-act="del-product" data-id="${p.id}">Hapus</button></div></div>`).join('') : empty('Belum ada produk.')}</div>`;
+}
+function rReviews() {
+  const r = ratingInfo(), rs = list('reviews').sort((a, b) => b.createdAt - a.createdAt);
+  return `<div class="top"><h1>Rating &amp; Ulasan</h1><span class="muted">${r.n ? r.avg.toFixed(1) + ' ★ dari ' + r.n + ' ulasan' : 'Belum ada ulasan'}</span></div>
+  <div class="list">${rs.length ? rs.map(v => `<article class="rec glass"><div class="rec-h"><div><b>${esc(v.name)}</b>${v.verified ? '<span class="ver">✓ Terverifikasi</span>' : ''}<small>${fmtDate(v.createdAt)}</small></div>${stars(v.rating)}</div><p style="font-size:14px">${esc(v.text)}</p><div class="rec-f"><button class="btn danger sm" data-act="del-review" data-id="${v.id}">Hapus ulasan</button></div></article>`).join('') : empty('Belum ada ulasan dari pelanggan.')}</div>`;
+}
+
+/* ---------- pengaturan toko ---------- */
+function rSettings() {
+  const s = CACHE.settings || {};
+  return `<div class="top"><h1>Pengaturan Toko</h1></div>
+  <form class="glass pad" id="setForm" novalidate>
+    <div class="grid2">
+      <div class="field"><label>Nomor WhatsApp toko</label><input name="wa" value="${esc(s.wa)}" inputmode="tel" placeholder="08123456789"><div class="hint">Dipakai untuk tombol chat dan konfirmasi pesanan.</div></div>
+      <div class="field"><label>Email</label><input name="email" value="${esc(s.email)}"></div>
+      <div class="field"><label>Alamat toko</label><input name="address" value="${esc(s.address)}"></div>
+      <div class="field"><label>Jam buka</label><input name="hours" value="${esc(s.hours)}"></div>
+      <div class="field"><label>Nama merchant (tampil di QRIS)</label><input name="merchant" value="${esc(s.merchant)}"></div>
+    </div>
+    <h3 style="margin:10px 0 12px">QRIS Pembayaran</h3>
+    <div class="two">
+      <div>${s.qris ? `<div class="qris" style="max-width:260px;margin:0"><img class="qr" src="/api/qris?v=${s.qrisV}" alt="QRIS saat ini"></div>` : '<div class="note">Belum ada QRIS. Pembeli melihat QR contoh bertanda DEMO.</div>'}</div>
+      <div><div class="field"><label>Unggah gambar QRIS asli (PNG / JPG)</label><input type="file" name="qrisFile" accept="image/png,image/jpeg,image/webp"><div class="hint">Gunakan gambar QRIS yang jelas dari bank / penyedia pembayaran Anda.</div></div>
+      ${s.qris ? '<label style="display:flex;gap:8px;align-items:center;color:#fff"><input type="checkbox" name="qrisDel" style="width:auto"> Hapus QRIS (kembali ke QR contoh)</label>' : ''}</div>
+    </div>
+    <button class="btn" style="margin-top:16px">Simpan Pengaturan</button>
+  </form>`;
+}
+function readQris(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader(); r.onerror = rej;
+    r.onload = async () => { if (file.size <= 600 * 1024) return res(r.result); try { res(await compressImage(file, 1200, .9)); } catch (e) { rej(e); } };
+    r.readAsDataURL(file);
+  });
+}
+document.addEventListener('submit', async e => {
+  if (e.target.id !== 'setForm') return; e.preventDefault(); const f = e.target;
+  const body = { wa: f.wa.value, email: f.email.value, address: f.address.value, hours: f.hours.value, merchant: f.merchant.value };
+  try { const file = f.qrisFile.files[0]; if (file) body.qrisImage = await readQris(file); else if (f.qrisDel && f.qrisDel.checked) body.qrisImage = null; }
+  catch (err) { return toast('Gambar QRIS tidak dapat dibaca.', 'err'); }
+  act(() => api('/api/admin/settings', 'PUT', body), 'Pengaturan disimpan');
+});
+document.addEventListener('change', async e => {
+  if (e.target.id !== 'restoreFile' || !e.target.files[0]) return;
+  const file = e.target.files[0]; e.target.value = '';
+  if (!confirm('Pulihkan data dari file cadangan ini? Semua data saat ini akan DIGANTI (salinan data saat ini disimpan otomatis di server).')) return;
+  let data; try { data = JSON.parse(await file.text()); } catch (err) { return toast('File cadangan tidak dapat dibaca.', 'err'); }
+  act(() => api('/api/admin/restore', 'POST', data), 'Data berhasil dipulihkan');
+});
+
+/* ---------- form produk ---------- */
+function productForm(p) {
+  const v = p || { name: '', brand: '', price: '', cond: 'Baru', stock: 1, cpu: '', ram: '', storage: '', gpu: '', screen: '', hue: 28, desc: '' };
+  const m = openModal(`<h2>${p ? 'Edit' : 'Tambah'} Laptop</h2><form id="pf" novalidate style="margin-top:14px">
+    <div class="field"><label>Nama produk</label><input name="name" required value="${esc(v.name)}"></div>
+    <div class="grid2"><div class="field"><label>Merk</label><input name="brand" required value="${esc(v.brand)}"></div><div class="field"><label>Kondisi</label><select name="cond"><option${v.cond === 'Baru' ? ' selected' : ''}>Baru</option><option${v.cond === 'Bekas' ? ' selected' : ''}>Bekas</option></select></div>
+    <div class="field"><label>Harga (Rp)</label><input name="price" type="number" min="0" required value="${v.price}"></div><div class="field"><label>Stok</label><input name="stock" type="number" min="0" required value="${v.stock}"></div>
+    <div class="field"><label>Prosesor</label><input name="cpu" value="${esc(v.cpu)}"></div><div class="field"><label>RAM</label><input name="ram" value="${esc(v.ram)}"></div>
+    <div class="field"><label>Penyimpanan</label><input name="storage" value="${esc(v.storage)}"></div><div class="field"><label>Grafis</label><input name="gpu" value="${esc(v.gpu)}"></div></div>
+    <div class="field"><label>Layar</label><input name="screen" value="${esc(v.screen)}"></div>
+    <div class="field"><label>Deskripsi</label><textarea name="desc">${esc(v.desc)}</textarea></div>
+    <div class="field"><label>Warna ilustrasi laptop</label><input name="hue" type="range" min="0" max="360" value="${v.hue}"></div>
+    <button class="btn" style="width:100%">Simpan Produk</button></form>`);
+  $('#pf', m).onsubmit = async e => {
+    e.preventDefault(); const f = e.target;
+    if (!f.name.value.trim() || !f.brand.value.trim() || f.price.value === '') return toast('Nama, merk, dan harga wajib diisi.', 'err');
+    const data = { name: f.name.value.trim(), brand: f.brand.value.trim(), cond: f.cond.value, price: +f.price.value, stock: Math.max(0, +f.stock.value || 0), cpu: f.cpu.value.trim(), ram: f.ram.value.trim(), storage: f.storage.value.trim(), gpu: f.gpu.value.trim(), screen: f.screen.value.trim(), desc: f.desc.value.trim(), hue: +f.hue.value };
+    closeModal();
+    await act(() => p ? api('/api/admin/products/' + p.id, 'PUT', data) : api('/api/admin/products', 'POST', data), 'Produk disimpan');
+  };
+}
+
+/* ---------- aksi ---------- */
+const val = (card, f) => { const el = $(`[data-f="${f}"]`, card); return el ? el.value : undefined; };
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-tab],[data-filter],[data-act],[data-photo]'); if (!t) return;
+  if (t.dataset.tab) { state.tab = t.dataset.tab; state.filter = 'Semua'; state.q = ''; render(); return; }
+  if (t.dataset.filter) { state.filter = t.dataset.filter; render(); return; }
+  if (t.dataset.photo) { const [id, i] = t.dataset.photo.split(':'); openModal(`<img src="/api/admin/sells/${id}/photo/${i}" alt="foto" style="border-radius:14px;margin-top:10px">`, 'wide'); return; }
+  const a = t.dataset.act, card = t.closest('[data-id]'), col = card && card.dataset.col, id = card ? card.dataset.id : t.dataset.id;
+  if (a === 'save-order') act(() => api('/api/admin/orders/' + id, 'PATCH', { status: val(card, 'status'), paid: val(card, 'paid') === 'Sudah dibayar' }), 'Pesanan diperbarui');
+  else if (a === 'save-service') act(() => api('/api/admin/services/' + id, 'PATCH', { status: val(card, 'status'), cost: +val(card, 'cost') || 0, adminNote: val(card, 'adminNote').trim() }), 'Servis diperbarui');
+  else if (a === 'save-sell') act(() => api('/api/admin/sells/' + id, 'PATCH', { status: val(card, 'status'), offer: +val(card, 'offer') || 0, adminNote: val(card, 'adminNote').trim() }), 'Pengajuan diperbarui');
+  else if (a === 'del') { if (confirm('Hapus data ini secara permanen?')) act(() => api(`/api/admin/${col}/${id}`, 'DELETE'), 'Data dihapus'); }
+  else if (a === 'csv') csv(list(t.dataset.col), 'adams-' + t.dataset.col);
+  else if (a === 'add-product') productForm();
+  else if (a === 'edit-product') productForm(list('products').find(p => p.id === id));
+  else if (a === 'del-product') { if (confirm('Hapus produk ini dari katalog?')) act(() => api('/api/admin/products/' + id, 'DELETE'), 'Produk dihapus'); }
+  else if (a === 'del-review') { if (confirm('Hapus ulasan ini?')) act(() => api('/api/admin/reviews/' + id, 'DELETE'), 'Ulasan dihapus'); }
+  else if (a === 'restore') $('#restoreFile').click();
+  else if (a === 'reset') { if (confirm('Hapus SEMUA pesanan, servis, pengajuan jual, dan ulasan? Produk tetap ada.')) act(() => api('/api/admin/reset', 'POST', {}), 'Data transaksi direset'); }
+});
+document.addEventListener('input', e => { if (e.target.id === 'gq') { state.q = e.target.value; render(); } });
+api('/api/admin/me').then(enter).catch(() => { authed = false; render(); });
+</script>
+</body>
+</html>
